@@ -9,21 +9,74 @@ class Lock:
         self.locked=[0,0,0]
         self.closed=[0,0,0]
         self.open=[0,0,0]
-        self.locked_dist=0
-        self.closed_dist=0
-        self.open_dist=0
+
+        self.locked_distance=0
+        self.closed_distance=0
+        self.open_distance=0
+
+        self.logger=DataLogger()
 
     def calibrate_locked(self):
-        pass
+        self.logger.measure(10, 100)
+        self.logger.std_dev()
+        self.locked=[self.logger.mean_x, self.logger.mean_y, self.logger.mean_z]
+        self.locked_distance = 10*(math.sqrt(self.logger.std_x * self.logger.std_x
+                                            + self.logger.std_y * self.logger.std_y
+                                            + self.logger.std_z * self.logger.std_z))
 
     def calibrate_closed(self):
-        pass
+        self.logger.measure(10, 100)
+        self.logger.std_dev()
+        self.closed=[self.logger.mean_x, self.logger.mean_y, self.logger.mean_z]
+        self.closed_distance = 10*(math.sqrt(self.logger.std_x * self.logger.std_x
+                                            + self.logger.std_y * self.logger.std_y
+                                            + self.logger.std_z * self.logger.std_z))
 
     def calibrate_open(self):
-        pass
+        self.logger.measure(10, 100)
+        self.logger.std_dev()
+        self.open=[self.logger.mean_x, self.logger.mean_y, self.logger.mean_z]
+        self.open_distance = 10*math.sqrt(self.logger.std_x**2
+                                            + self.logger.std_y**2
+                                            + self.logger.std_z**2)
+
+    def is_locked(self):
+        self.logger.measure(10, 10)
+        (x,y,z) = self.logger.mean()
+        distance = (self.locked[0]-x)**2 + (self.locked[1]-y)**2+(self.locked[2]-z)**2
+        if distance<self.locked_distance:
+            return True
+        else:
+            return False
+
+    def is_closed(self):
+        self.logger.measure(10, 10)
+        (x,y,z) = self.logger.mean()
+        distance = (self.closed[0]-x)**2 + (self.closed[1]-y)**2+(self.closed[2]-z)**2
+        if distance<self.closed_distance:
+            return True
+        else:
+            return False
+
+    def is_open(self):
+        self.logger.measure(10, 10)
+        (x,y,z) = self.logger.mean()
+        distance = (self.open[0]-x)**2 + (self.open[1]-y)**2+(self.open[2]-z)**2
+        if distance<self.open_distance:
+            return True
+        else:
+            return False
 
     def get_status(self):
-        pass
+        if self.is_locked():
+            return 1
+        elif self.is_closed():
+            return 2
+        else:
+            return 3
+
+
+
 
 class DataLogger:
     """Logs data from the magenetomer for implementing the calibration levels"""
@@ -84,7 +137,7 @@ class DataLogger:
 
         self.std_y = math.sqrt(sum(map(lambda x: (x - self.mean_y) * (x - self.mean_y), self.y)) / len(self.y))
 
-        self.std_x = math.sqrt(sum(map(lambda x: (x - self.mean__z) * (x - self.mean__z), self.x)) / len(self.x))
+        self.std_x = math.sqrt(sum(map(lambda x: (x - self.mean_z) * (x - self.mean_z), self.x)) / len(self.x))
 
         return (self.std_x,self.std_y,self.std_z)
 

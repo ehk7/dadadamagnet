@@ -36,10 +36,3 @@ class Magnetometer:
         #return (self.x, self.y, self.z)
         #print(math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z))
 
-
-class Lock:
-    """Convert reading from the magenetometer"""
-    def __init__(self):
-        self.magnetometer=Magnetometer()
-
-
