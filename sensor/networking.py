@@ -5,16 +5,26 @@ import machine
 
 class MQTTManager:
     """Manages communication to/from the MQTT broker"""
-    def __init__(self):
-        pass
+    def __init__(self, client_id=""):
+        self.topic = "esys/dadada/"
+        if client_id == "":
+            self.client_id = machine.unique_id()
+        else:
+            self.client_id = client_id
+        self.broker = broker
+        self.client = MQTTClient(self.client_id, self.broker)
+        self.timestamp = ""
+        self.client.set_callback(self.update_timestamp())
+        self.client.connect()
+        self.client.subscribe("esys/time")
 
     def publish(self, topic, message):
         """publish message to the broker with topic"""
-        pass
+        self.client.publish(topic, message)
 
     def update_timestamp(self, topic, message):
         """callback to update timestamp"""
-        pass
+        self.timestamp=message
 
 class WiFi:
     """CLass to manage the WiFI connection"""
