@@ -41,3 +41,6 @@ class MQTTManager:
 
     def publish(self, topic, message):
         self.client.publish(topic, message)
+
+if __name__=="__main__":
+    mq = MQTTManager()
