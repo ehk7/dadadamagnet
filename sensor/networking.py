@@ -1,8 +1,10 @@
 import network
 from umqtt.simple import MQTTClient
 import machine
-from utility import Status
 import ubinascii
+import utime
+from utility import Status
+from ujson import dumps
 
 
 class MQTTManager:
@@ -15,35 +17,51 @@ class MQTTManager:
             self.client_id = client_id
         self.broker = broker
         self.client = MQTTClient(self.client_id, self.broker)
-        self.timestamp = ""
-        self.client.set_callback(self.on_message())
+        self.timestamp = 0
+        
         self.client.connect()
+        self.client.set_callback(self.on_message)
         self.client.subscribe("esys/time")
         self.client.subscribe("esys/dadada/userstatus")
+        self.status = 0
 
-    def publish(self, topic, message):
+    def publish(self, topic, doorState):
         """publish message to the broker with topic"""
         #TODO: implement encryption here
+        messageToSend = {
+            "Door state" : doorState,
+            "Time Stamp" : self.timestamp
+        }
+
         try:
-            self.client.publish(topic, message)
+            self.client.publish(topic, bytes(dumps(messageToSend), 'utf-8'), 1)
         except OSError as e:
             return 1
 
         return 0
 
 
-    def on_message(self, topic, message):
+    def on_message(self, topBytes, mesBytes):
+        print(topBytes)
         """callback to get calibration instructions from user"""
+        topic = topBytes.decode("utf-8")
+        message = mesBytes.decode("utf-8")
         if topic == "esys/time":
+            print("time should be updated")
             self.update_timestamp(message)
-        elif topic == "esys/dadada/userstatus":
+        if topic == "esys/dadada/userstatus":
             self.status = int(message)
+            print("userdata")
 
 
 
     def update_timestamp(self, message):
         """callback to update timestamp"""
-        self.timestamp=message
+        dateTimeArr = message.split("T")
+        date, time = dateTimeArr
+        dateArr = date.split("-")
+        timeArr = time.split(":")
+        self.timestamp=utime.mktime((int(dateArr[0]), int(dateArr[1]), int(dateArr[2]), int(timeArr[0]), int(timeArr[1]), int(timeArr[2][:2]), 0, 0))
 
 class WiFi:
     """CLass to manage the WiFI connection"""

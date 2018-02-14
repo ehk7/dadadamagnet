@@ -5,7 +5,7 @@ import ujson
 import math
 from utility import Status
 
-
+status = Status()
 
 class Lock:
     """Takes measurements of magnetometer levels to determine lock status"""
@@ -72,11 +72,11 @@ class Lock:
 
     def get_status(self):
         if self.is_locked():
-            return Status.LOCKED
+            return status.getStatusCode("LOCKED")
         elif self.is_closed():
-            return Status.CLOSED
+            return status.getStatusCode("CLOSED")
         else:
-            return Status.OPEN
+            return status.getStatusCode("OPEN")
 
 
 

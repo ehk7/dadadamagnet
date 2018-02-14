@@ -1,12 +1,25 @@
 import math
-from enum import Enum
+#from enum import Enum
 
-class Status(Enum):
-    UNCALIBRATED = 1
-    CALIBRATING = 2
-    LOCKED = 3
-    CLOSED = 4
-    OPEN = 5
+#class Status(Enum):
+#    UNCALIBRATED = 1
+#    CALIBRATING = 2
+#    LOCKED = 3
+#    CLOSED = 4
+#    OPEN = 5
+
+class Status:
+    def getStatusCode(self, statusName):
+        if statusName == "UNCALIBRATED":
+            return 1
+        elif statusName == "CALIBRATING":
+            return 2
+        elif statusName == "LOCKED":
+            return 3
+        elif statusName == "CLOSED":
+            return 4
+        elif statusName == "OPEN":
+            return 5
 
 
 class Vector3D:
