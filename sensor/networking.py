@@ -14,15 +14,24 @@ class MQTTManager:
         self.broker = broker
         self.client = MQTTClient(self.client_id, self.broker)
         self.timestamp = ""
-        self.client.set_callback(self.update_timestamp())
+        self.client.set_callback(self.on_message())
         self.client.connect()
         self.client.subscribe("esys/time")
+        self.client.subscribe("esys/dadada/status")
 
     def publish(self, topic, message):
         """publish message to the broker with topic"""
+        #TODO: implement encryption here
         self.client.publish(topic, message)
 
-    def update_timestamp(self, topic, message):
+    def on_message(self, topic, message):
+        """callback to get calibration instructions from user"""
+        if topic == "esys/time":
+            self.update_timestamp(message)
+        elif topic == "esys/dadada/status":
+
+
+    def update_timestamp(self, message):
         """callback to update timestamp"""
         self.timestamp=message
 
