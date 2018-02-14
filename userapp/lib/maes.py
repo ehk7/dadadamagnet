@@ -50,7 +50,7 @@ there clears it up.
 # THE SOFTWARE.
 ####
 
-import ubinascii
+import binascii as ubinascii
 from array import array
 
 # Globals mandated by PEP 272:

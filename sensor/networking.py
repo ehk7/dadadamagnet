@@ -1,14 +1,16 @@
 import network
 from umqtt.simple import MQTTClient
 import machine
+from utility import Status
+import ubinascii
 
 
 class MQTTManager:
     """Manages communication to/from the MQTT broker"""
-    def __init__(self, client_id=""):
+    def __init__(self, client_id="", broker = "192.168.0.10"):
         self.topic = "esys/dadada/"
         if client_id == "":
-            self.client_id = machine.unique_id()
+            self.client_id = ubinascii.hexlify(machine.unique_id())
         else:
             self.client_id = client_id
         self.broker = broker
@@ -17,18 +19,26 @@ class MQTTManager:
         self.client.set_callback(self.on_message())
         self.client.connect()
         self.client.subscribe("esys/time")
-        self.client.subscribe("esys/dadada/status")
+        self.client.subscribe("esys/dadada/userstatus")
 
     def publish(self, topic, message):
         """publish message to the broker with topic"""
         #TODO: implement encryption here
-        self.client.publish(topic, message)
+        try:
+            self.client.publish(topic, message)
+        except OSError as e:
+            return 1
+
+        return 0
+
 
     def on_message(self, topic, message):
         """callback to get calibration instructions from user"""
         if topic == "esys/time":
             self.update_timestamp(message)
-        elif topic == "esys/dadada/status":
+        elif topic == "esys/dadada/userstatus":
+            self.status = int(message)
+
 
 
     def update_timestamp(self, message):

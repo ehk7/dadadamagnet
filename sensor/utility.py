@@ -1,4 +1,13 @@
 import math
+from enum import Enum
+
+class Status(Enum):
+    UNCALIBRATED = 1
+    CALIBRATING = 2
+    LOCKED = 3
+    CLOSED = 4
+    OPEN = 5
+
 
 class Vector3D:
     """Class respresenting 3d vectors"""

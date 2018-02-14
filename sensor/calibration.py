@@ -3,13 +3,13 @@ from utime import sleep_ms
 from utility import Vector3D
 import ujson
 import math
+from utility import Status
+
+
 
 class Lock:
     """Takes measurements of magnetometer levels to determine lock status"""
     def __init__(self):
-        # self.locked=[0,0,0]
-        # self.closed=[0,0,0]
-        # self.open=[0,0,0]
         self.locked = Vector3D()
         self.closed = Vector3D()
         self.open = Vector3D()
@@ -20,6 +20,7 @@ class Lock:
 
         self.logger=DataLogger()
         self.scale_factor = 20
+
 
     def set_scale_factor(self, scale_factor):
         self.scale_factor = scale_factor
@@ -71,11 +72,11 @@ class Lock:
 
     def get_status(self):
         if self.is_locked():
-            return 1
+            return Status.LOCKED
         elif self.is_closed():
-            return 2
+            return Status.CLOSED
         else:
-            return 3
+            return Status.OPEN
 
 
 

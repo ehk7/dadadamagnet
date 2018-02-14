@@ -1,26 +1,20 @@
 import wx
-from enum import Enum
+import lib.maes
 from mqtt import MQTTManager
-
-class AppStatus(Enum):
-    START=1
-    OPEN=3
-    UNLOCKED=4
-    LOCKED=5
+from mqtt import Status
 
 class MainFrame(wx.Frame):
     """Main window"""
     def __init__(self, parent, title):
-        self.status = AppStatus.START
+        self.devicestatus = Status.UNCALIBRATED
         super(MainFrame, self).__init__(parent, title=title, size=(600,500))
         self.panel = wx.Panel(self)
         self.panel.Bind(wx.EVT_PAINT, self.OnPaint)
         self.InitMenu()
         self.InitWidgets()
-
         self.Centre()
         self.Show()
-        #self.mqtt = MQTTManager()
+        self.mqtt = MQTTManager(self)
 
     def InitWidgets(self):
         self. txt1 = wx.StaticText(self.panel, pos=(10, 10), label="Attach the Smart Lock to your door, close and lock "
@@ -32,29 +26,34 @@ class MainFrame(wx.Frame):
     def DisplayStatus(self, status):
         pass
 
+    def SetStatus(self, status):
+        pass
+
+    def publish_status(self, status):
+        self.mqtt.publish("esys/dadada/user/status", "")
+
     def OnCalibrate(self, event):
         if self.calibrationButton.Label=='Calibrate: locked':
-            print("Do calibration now for closed and locked")
+            self.mqtt.publish("esys/dadada/userstatus","1")
             self.calibrationButton.Label="Calibrate: closed and Unlocked"
 
         elif self.calibrationButton.Label=="Calibrate: closed and Unlocked":
+            self.mqtt.publish("esys/dadada/userstatus", "2")
             print("Do calibration now for closed and unlocked")
             self.calibrationButton.Label = "Calibrate: unlocked and open"
 
         elif self.calibrationButton.Label=='Calibrate: unlocked and open':
+            self.mqtt.publish("esys/dadada/userstatus", "3")
             print("Do calibration now for open and unlocked")
             self.calibrationButton.Show(False)
-            self.txt1.Label="Status:"
-            font = self.txt1.GetFont()
-            font.SetPointSize(24)
-            self.txt1.SetFont(font.Bold())
+
             self.txt2 = wx.StaticText(self.panel, pos=(250, 220),
                                      label="LOCKED")
             font = self.txt2.GetFont()
             font.SetPointSize(24)
             self.txt2.SetFont(font.Bold())
             self.txt2.SetForegroundColour("RED")
-            self.status=AppStatus.OPEN
+            self.devicestatus=Status.OPEN
         self.Refresh()
 
 
@@ -81,7 +80,9 @@ class MainFrame(wx.Frame):
         wx.MessageBox("This is a demo app showing how the sensor can communicate with the user through MQTT",
                       "About DaDaDa", wx.OK|wx.ICON_INFORMATION)
 
-    def DrawRing(self, dc, x, y, innerRadius, outerRadius, colour):
+    def DrawRing(self, x, y, innerRadius, outerRadius, colour, dc=0):
+        if dc==0:
+            dc=self.panel
         dc.Clear()
         dc.SetPen(wx.Pen(colour))
         dc.SetBrush(wx.Brush(colour))
@@ -94,15 +95,15 @@ class MainFrame(wx.Frame):
 
     def OnPaint(self, event):
         dc = wx.PaintDC(event.GetEventObject())
+        print("in onpaint")
+        if self.devicestatus == Status.OPEN:
+            self.DrawRing(300, 250, 120, 150, "RED", dc)
 
-        if self.status == AppStatus.OPEN:
-            self.DrawRing(dc, 300, 250, 120, 150, "RED")
+        elif self.devicestatus == Status.CLOSED:
+            self.DrawRing(300, 250, 120, 150, "YELLOW", dc)
 
-        elif self.status == AppStatus.UNLOCKED:
-            self.DrawRing(dc, 300, 250, 120, 150, "YELLOW")
-
-        elif self.status == AppStatus.LOCKED:
-            self.DrawRing(dc, 300, 250, 120, 150, "GREEN")
+        elif self.devicestatus == Status.LOCKED:
+            self.DrawRing(300, 250, 120, 150, "GREEN",dc)
 
 
 
