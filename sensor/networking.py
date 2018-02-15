@@ -46,7 +46,9 @@ class MQTTManager:
 
         self.client.subscribe("esys/time")
         self.client.subscribe("esys/dadada/userstatus")
+        self.client.subscribe("esys/dadada/alarm")
 
+        self.alarm_status=False
         self.status = 0
 
     def publish(self, topic, doorState):
@@ -79,6 +81,7 @@ class MQTTManager:
         :return: no return value
         """
         print(topicBytes)
+        print(msgBytes)
         """callback to get calibration instructions from user"""
 
         #decode binary to utf-8 strings
@@ -92,6 +95,9 @@ class MQTTManager:
         if topic == "esys/dadada/userstatus":
             #convert to integer status code
             self.status = int(message)
+
+        if topic == "esys/dadada/alarm":
+            self.alarm_status = int(message)
 
 
 

@@ -20,8 +20,12 @@ class MainFrame(wx.Frame):
         #used to show calibration instructions
         self.txt1=None
 
+
         #status text
         self.txt2=None
+
+        self.alarmButton=None
+        self.alarm=0
 
         #create menus
         self.InitMenu()
@@ -44,8 +48,20 @@ class MainFrame(wx.Frame):
         self. txt1 = wx.StaticText(self.panel, pos=(10, 10), label="Attach the Smart Lock to your door, close and lock "
                                                                    "it, then click the button to start calibrating the sensor.")
 
-        self.calibrationButton = wx.Button(self.panel, wx.ID_ANY, label='Calibrate: locked', size=(200, 30), pos=(200, 30))
+        self.calibrationButton = wx.Button(self.panel, wx.ID_ANY, label='Calibrate: locked', size=(200, 30),
+                                           pos=(200, 30))
         self.calibrationButton.Bind(wx.EVT_BUTTON, self.OnCalibrate)
+
+    def OnAlarm(self, event):
+        #code to toggle alarm button text and send alarm activate/disable messages to app
+        if self.alarm == 1:
+            self.alarmButton.Label="Alarm OFF"
+            self.alarm = 0
+            self.mqtt.publish("esys/dadada/alarm", str(self.alarm))
+        else:
+            self.alarmButton.Label = "Alarm ON"
+            self.alarm = 1
+            self.mqtt.publish("esys/dadada/alarm", str(self.alarm))
 
     def DisplayStatus(self, status):
         """
@@ -106,6 +122,10 @@ class MainFrame(wx.Frame):
         Creates the status text used to display the locks state
         :return: no return value
         """
+        self.alarmButton = wx.Button(self.panel, wx.ID_ANY, label='Alarm OFF', size=(80, 30),
+                                           pos=(50, 450))
+        self.alarmButton.Bind(wx.EVT_BUTTON, self.OnAlarm)
+
         self.txt2 = wx.StaticText(self.panel, label="LOCKED", style=wx.ALIGN_CENTER)
         font = self.txt2.GetFont()
         font.SetPointSize(48)
@@ -113,11 +133,14 @@ class MainFrame(wx.Frame):
         self.txt2.SetForegroundColour("RED")
 
         #sizers are used to centre align the text
-        hbox5 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        hbox5.Add(self.txt2, wx.CENTER)
-        vbox.Add(hbox5, flag=wx.CENTER | wx.TOP, border=45)
+        hbox1.Add(self.txt2, wx.CENTER)
+        hbox2.Add(self.alarmButton, wx.BOTTOM|wx.CENTRE)
+        vbox.Add(hbox1, flag=wx.CENTER | wx.TOP, border=45)
+        vbox.Add(hbox2, flag=wx.BOTTOM|wx.CENTRE)
 
         self.panel.SetSizer(vbox)
 
