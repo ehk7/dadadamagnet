@@ -4,58 +4,66 @@ from calibration import Lock
 from networking import WiFi
 from networking import MQTTManager
 import utime
-from calibration import DataLogger
 from utility import Status
-from ujson import dumps
 
-wifi_conn = WiFi()  #establishes a wifi connection
-magnetometer = Magnetometer()
+
+#connect to wifi
+wifi_conn = WiFi()
+
+
+#init
 mqttmanager = MQTTManager()
 lock = Lock()
 status = Status()
 
-# Let the door status be open (3)
-currentStatus = status.getStatusCode("UNCALIBRATED")
-mqttmanager.publish("esys/dadada/status",currentStatus)
+#at init send status uncalibrated
+currentStatus = status.getStatusCode("UNCALIBRATED") #1
 
-while currentStatus == status.getStatusCode("UNCALIBRATED"):
+while currentStatus == status.getStatusCode("UNCALIBRATED"): #1
     # do nothing until the calibration has been completed (status == 4)
-    mqttmanager.publish("esys/dadada/status","Waiting for calibration")
+    #mqttmanager.publish("esys/dadada/status", currentStatus)
     if not wifi_conn.station.active():
         wifi_conn.connect()
 
-    if mqttmanager.status==1:
+    if mqttmanager.status==status.getStatusCode("LOCKED"): #calibrate for locked state
         lock.calibrate_locked()
-        mqttmanager.publish("esys/dadada/status",status.getStatusCode("CALIBRATING"))
+        mqttmanager.publish("esys/dadada/status",status.getStatusCode("LOCKED")) #2
+        mqttmanager.status=0
         print("calib locked")
-    elif mqttmanager.status==2:
+
+    elif mqttmanager.status==status.getStatusCode("CLOSED"): #calibrate closed&unlocked state
         lock.calibrate_closed()
-        mqttmanager.publish("esys/dadada/status", status.getStatusCode("CALIBRATING"))
+        mqttmanager.publish("esys/dadada/status", status.getStatusCode("CLOSED")) #2
+        mqttmanager.status = 0
         print("calib closed")
-    elif mqttmanager.status==3:
+
+    elif mqttmanager.status==status.getStatusCode("OPEN"): #open state
         lock.calibrate_open()
-        mqttmanager.publish("esys/dadada/status", status.getStatusCode("CALIBRATING"))
+        mqttmanager.publish("esys/dadada/status", status.getStatusCode("OPEN")) #2
+        mqttmanager.status = 0
         print("calib open")
-        currentStatus = "5"
+
+        currentStatus = status.getStatusCode("OPEN") #OPEN
     utime.sleep_ms(300)
 
     mqttmanager.client.check_msg()
-    
+
+#mqttmanager.publish("esys/dadada/status","Calibrated")
+print("entering main loop")
 
 while(True):
     #if mqttmanager.publish("esys/dadada/wificheck",lock.logger.get_json()):
     #    wifi_conn.connect()
     if not wifi_conn.station.active():
         wifi_conn.connect()
-    
-    mqttmanager.publish("esys/dadada/status","Calibratedaaaaaaaaaaaaaaaaaaa")
+
     # update MQTT broker when door changes state
     nextState = lock.get_status()
-    print("Current: " + str(currentStatus))
+    mqttmanager.publish("esys/dadada/status2", currentStatus)
+
     if currentStatus != nextState:
         currentStatus = nextState    # save the current door state
         mqttmanager.publish("esys/dadada/status", currentStatus)   #update mqtt
-        print("Status changed, now " + str(currentStatus))
 
     mqttmanager.client.check_msg()
     utime.sleep_ms(300)

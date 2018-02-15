@@ -26,20 +26,20 @@ class Lock:
         self.scale_factor = scale_factor
 
     def calibrate_locked(self):
-        self.logger.measure(100, 30)
+        self.logger.measure(20, 30)
         self.logger.std_dev()
 
         self.locked = self.logger.data_mean
         self.locked_distance = self.logger.data_std_dev.distance(Vector3D(0,0,0))
 
     def calibrate_closed(self):
-        self.logger.measure(100, 30)
+        self.logger.measure(20, 30)
         self.logger.std_dev()
         self.closed=self.logger.data_mean
         self.closed_distance = self.logger.data_std_dev.distance(Vector3D(0, 0, 0))
 
     def calibrate_open(self):
-        self.logger.measure(100, 30)
+        self.logger.measure(20, 30)
         self.logger.std_dev()
         self.open=self.logger.data_mean
         self.open_distance = self.logger.data_std_dev.distance(Vector3D(0, 0, 0))

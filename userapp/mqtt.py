@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 import time
 from enum import Enum
-
+from json import loads
 
 class Status(Enum):
     UNCALIBRATED = 1
@@ -13,6 +13,7 @@ class Status(Enum):
 
 class MQTTManager:
     def __init__(self, mainframe):
+
         self.mainframe=mainframe
         self.client = mqtt.Client()
         self.client.on_connect = self.on_connect
@@ -25,22 +26,22 @@ class MQTTManager:
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code " + str(rc))
         client.subscribe("esys/time")
-        client.subscribe("esys/dadada/status")
+        #client.subscribe("esys/dadada/status")
+
+        client.subscribe("esys/dadada/userstatus")
+        client.subscribe("esys/dadada/status2")
 
     def on_message(self, client, userdata, msg):
         print(msg.topic + " " + str(msg.payload))
-        if msg.topic == "esys/dadada/status":
-            self.mainframe.status = int(msg.payload)
-            print("STATUS "+str(self.mainframe.status))
-            if self.mainframe.status==1:
-                self.mainframe.txt2.Label="LOCKED"
-            elif self.mainframe.status==2:
-                self.mainframe.txt2.Label="CLOSED/UNLOCKED"
-            elif self.mainframe.status==3:
-                self.mainframe.txt2.Label="OPEN"
+        if msg.topic=="esys/dadada/status":
+            data = loads(msg.payload)
+            if data["Door state"]=='Calibratedaaaaaaaaaaaaaaaaaaa' or data["Door state"]=="Waiting for calibration" or data["Door state"]=="Calibrated":
+                return 0
+            self.doorstate = data["Door state"]
+            self.timestamp = data["Time Stamp"]
+            self.mainframe.DisplayStatus(str(self.doorstate))
+
 
     def publish(self, topic, message):
-        self.client.publish(topic, message)
 
-if __name__=="__main__":
-    mq = MQTTManager()
+        self.client.publish(topic, bytes(message, 'utf-8'))

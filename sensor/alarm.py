@@ -3,6 +3,7 @@ import time
 
 class Alarm:
     def __init__(self):
+        """Initialise pin output to piezoelectric buzzer"""
         self.pin=machine.Pin(13, machine.Pin.OUT)
 
     def beep(self, freq = 1000, t = 5):
