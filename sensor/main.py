@@ -1,4 +1,9 @@
-from magnetometer import Magnetometer
+"""
+The main module that is executed on boot by the ESP8266
+The module contains no class definition and consists of two main loops, one for setting up the device and recording
+magnetometer measurements for each of the device states (locked, closed/unlocked, open), and the other for continuously
+monitoring the state and acting on any changes.
+"""
 # The following line  had 'magnetometer' instead  of 'calibration'
 from calibration import Lock
 from networking import WiFi

@@ -1,6 +1,9 @@
 import math
 
 class Status:
+    """
+    Class used to convert between human readable statuses and numerical codes
+    """
     def getStatusCode(self, statusName):
         if statusName == "UNCALIBRATED":
             return 1
@@ -17,17 +20,31 @@ class Status:
 class Vector3D:
     """Class respresenting 3d vectors,"""
     def __init__(self,x=0,y=0,z=0):
+        """
+        Create a new vector
+        :param x: x value to use, defaults to 0
+        :param y: y value to use, defaults to 0
+        :param z: z value to use, defaults to 0
+        """
         self.x=x
         self.y=y
         self.z=z
 
 
     def dot(self, vector):
-        """dot product self and vector"""
+        """
+        Dot product self and vector
+        :param vector: vector calculate the other dot product with
+        :return: the dot product
+        """
         return (self.x*vector.x+self.y*vector.y+self.z*vector.z)
 
     def __add__(self, vector):
-        """overloaded add operation operator, simply add the respective components"""
+        """
+        Overloaded add operation operator, simply add the respective components
+        :param vector: vector add
+        :return: the sum
+        """
         res = Vector3D()
         res.x=vector.x+self.x
         res.y=vector.y+self.y
@@ -35,7 +52,11 @@ class Vector3D:
         return res
 
     def mul(self,scalar):
-        """multiplication of vector by scalar"""
+        """
+        Multiplication of vector by scalar
+        :param scalar: scalar value to multiply by
+        :return: the product
+        """
         res = Vector3D()
         res.x = self.x*scalar
         res.y = self.y*scalar
@@ -43,19 +64,33 @@ class Vector3D:
         return res
 
     def __sub__(self, other):
-        """subtraction operator overloaded to support vector subtraction"""
+        """
+        Subtraction operator overloaded to support vector subtraction
+        :param other: subtracts the vector form self
+        :return: the result
+        """
         return (self+other.mul(-1))
 
     def __mul__(self, other):
-        """Hadamard product"""
+        """
+        Hadamard product of self and other
+        :param other: the other vector to calulate the Hadamard product with
+        :return: the result of the calculation
+        """
         return Vector3D(self.x*other.x, self.y*other.y, self.z*other.z)
 
     def __str__(self):
-        """Support for easy printing and conversion to string"""
+        """
+        Support for easy printing and conversion to string
+        :return: a string representation of the vector
+        """
         return "("+str(self.x)+", "+str(self.y)+", "+str(self.z)+")"
 
     def sqrt(self):
-        """Takes the square root of each component of the vector"""
+        """
+        Takes the square root of each component of the vector (Hadamard square root)
+        :return: the square root
+        """
         res = Vector3D(self.x,self.y,self.z)
         res.x=math.sqrt(res.x)
         res.y=math.sqrt(res.y)
@@ -63,7 +98,11 @@ class Vector3D:
         return res
 
     def distance(self, other):
-        """Calculates the distance (magnitude of the difference) between two vectors"""
+        """
+        Calculates the distance (magnitude of the difference) between two vectors
+        :param other: the other vector to calculate the distance from
+        :return: scalar result
+        """
         res = self-other
         res= res.dot(res)
         return (math.sqrt(res))
