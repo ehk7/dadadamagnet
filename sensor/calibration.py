@@ -1,3 +1,6 @@
+"""
+Module containing Lock and DataLogger class used to convert raw magnetometer reading into open, closed, locked statuses
+"""
 from magnetometer import Magnetometer
 from utime import sleep_ms
 from utility import Vector3D

@@ -1,3 +1,6 @@
+"""
+Module containing Vector3D and Status utility classes
+"""
 import math
 
 class Status:
